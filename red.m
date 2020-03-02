@@ -77,6 +77,7 @@ endfor
 subplot(1,2,1)
 plot(resultado(:,1),resultado(:,2),'+')
 axis([0 max(resultado(:,1)) 0 max(resultado(:,2))])
+xlabel('Q'); ylabel('H bombeo')
 hold on
 plot([0 sum(q)],[min(resultado(:,2)) min(resultado(:,2))])
 hold off
@@ -90,3 +91,4 @@ endfor
 distBocas=distBocas./sum(distBocas);
 subplot(1,2,2)
 bar(distBocas)
+xlabel('boca condiciona');ylabel('frecuencia')
