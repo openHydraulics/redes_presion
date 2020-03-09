@@ -1,4 +1,5 @@
 %Cálculo de red de distribución a presión
+clear;clc
 
 %Enlace a funciones en carperta ./src/
 addpath('./src/');
@@ -52,7 +53,7 @@ for p=0.05:0.05:1
     %Caudal de cada tramo (tubería)
     
     ## Demanda cuando una boca abastece a uno sólo usuario
-    #qdemand=q.*(rand(8,1)>p);
+    ##qdemand=q.*(rand(8,1)>p);
     
     ## Demanda cuando una boca abastece a múltiples usuarios
     qdemand=q.*p.*rand(8,1);

@@ -1,4 +1,5 @@
 %Cálculo de red de distribución a presión
+clear;clc
 
 %Constante suavizado convergencia solución
 cte=100;
@@ -9,6 +10,7 @@ addpath('./src/');
 resultado=[];
 resultado2=[];
 resultado3=[];
+resultado4=[];
 distBocas=[];
 
 ## z0, cota del origen del agua
@@ -27,7 +29,7 @@ nu=1.3e-6;
 
 ## Caudal q y altura de presión h demandados en cada nodo (boca)
 q=transpose([0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 0.1 -0.1]).*(24/16*16/8);
-hreq=transpose([35 35 35 35 35 35 35 35 35 35]);
+hreq=transpose([35 35 35 35 35 35 35 35 0 0]);
 
 
 ## x, abcisas de los nudos
@@ -62,7 +64,7 @@ for p=0.05:0.05:1
     %Caudal de cada tramo (tubería)
     
     ## Demanda cuando una boca abastece a uno sólo usuario
-    #qdemand=q.*(rand(8,1)>p);
+    ##qdemand=q.*(rand(10,1)>p);
     
     ## Demanda cuando una boca abastece a múltiples usuarios
     qdemand=q.*p.*rand(10,1);
@@ -96,6 +98,7 @@ for p=0.05:0.05:1
       resultado=[resultado;max(Q) max(H_nodo-(z+hreq)) min(H_nodo-(z+hreq))];
       resultado2=[resultado2 H_nodo];
       resultado3=[resultado3 H_nodo-(z+hreq)==min(H_nodo-(z+hreq))];
+      resultado4=[resultado4 qdemand];
     endif
     [p i]
   endfor
