@@ -98,3 +98,8 @@ plot(sort(distQ))
 xlabel('horas de un año')
 ylabel('Q(L/s)')
 hold off
+
+caudales=reshape(q,8,[]);
+
+%Se guardan los caudales demandados de las bocas durante las aproximadamente 8640 horas de un año
+save('cauddemandbocas.m','caudales','-append')

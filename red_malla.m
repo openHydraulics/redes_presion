@@ -16,9 +16,15 @@ distBocas=[];
 
 #Se cargan los datos del caso a estudiar
 datos;
+#Se cargan los caudales demandados desde las bocas
+load cauddemandbocas.m caudales;
 
-## Caudal q y altura de presión h demandados en cada nodo (boca)
-q=[q;0.1;-0.1].*(24/16*16/8);
+numsim=size(caudales,2);
+numbocas=size(caudales,1);
+
+iterQbombeomax=0;
+Qbombeomax=0;
+
 hreq=[hreq;0;0];
 
 %Aportación bombeo
@@ -34,7 +40,7 @@ x=[x;3000;3000];
 y=[y;-500;-500];
 z=[z;125;125];
  
-D=[D;0.45135;0.45135];
+D=[D;0.2;0.2];
 L=[L;500;500];
 k=[k;4e-5;4e-5];
 
@@ -56,17 +62,18 @@ Mconexmalla_Q=transpose(Mconexmalla_hf);
 %Vector 1 al número de bocas
 vectorBocas=(1:1:10);
 
-for p=0.05:0.05:1
-##p=1;
-  for i=1:100
-    %Caudal de cada tramo (tubería)
-    
-    ## Demanda cuando una boca abastece a uno sólo usuario
-    ##qdemand=q.*(rand(10,1)>p);
-    
-    ## Demanda cuando una boca abastece a múltiples usuarios
-    qdemand=q.*p.*rand(10,1);
 
+for i=1:numsim
+  %Caudal de cada tramo (tubería)
+  
+  ## Demanda cuando una boca abastece a uno sólo usuario
+  ##qdemand=q.*(rand(10,1)>p);
+  
+  ## Demanda cuando una boca abastece a múltiples usuarios
+  qdemand=[caudales(:,i).*1e-3;[0;0]];
+
+  if sum(qdemand)>0
+  
     H_nodo=hreq+z;
     H_nodo_ant=zeros(10,1);    
     
@@ -76,10 +83,10 @@ for p=0.05:0.05:1
       
       Q=Mconexmalla_Q*qdemand;
       Qbombeo=max(Q);
-
+  
       %Pérdida de carga en cada tramo
       hf=IWC(Q,D,k,nu).*L;
-
+  
       %Carga en cada nodo
       H_nodo=H0-Mconexmalla_hf*hf;
       
@@ -99,19 +106,19 @@ for p=0.05:0.05:1
     %Coeficiente déficit energético
     coefDef=sum(qdemand.*H_nodo.*((H_nodo-z)<hreq))/sum(qdemand.*H_nodo.*hreq);
 
-    if max(Q)>0
-      %Columnas vector resultado [c1:caudal cabeza c2: presión máxima
-      resultado=[resultado;Qbombeo max((H_nodo-z).*(hreq>0)) min((H_nodo-z).*(hreq>0))];
-      resultado2=[resultado2 H_nodo];
-      resultado3=[resultado3 H_nodo-(z+hreq)==min(H_nodo-(z+hreq))];
-      resultado4=[resultado4 qdemand];
-      
-      %Indicadores
-      indicadores=[indicadores; Qbombeo rendEnerg coefDef];
-    endif
-    [p i]
-  endfor
+  
+    %Columnas vector resultado [c1:caudal cabeza c2: presión máxima
+    resultado=[resultado;Qbombeo max((H_nodo-z).*(hreq>0)) min((H_nodo-z).*(hreq>0))];
+    resultado2=[resultado2 H_nodo];
+    resultado3=[resultado3 H_nodo-(z+hreq)==min(H_nodo-(z+hreq))];
+    resultado4=[resultado4 qdemand];
+    
+    %Indicadores
+    indicadores=[indicadores; Qbombeo rendEnerg coefDef];
+ 
+  endif
 endfor
+
 
 subplot(1,3,1)
 plot(resultado(:,1),resultado(:,2),'+')
