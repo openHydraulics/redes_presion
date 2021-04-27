@@ -1,5 +1,7 @@
 clear;clc
 close all
+%Se establece el valor semilla de la funcion de generacion de numeros pseudoaleatorios rand(), para que sea aleatoria.
+rand('state',sum(100*clock))
 
 %Simulación de la distribución anual de la demanda desde las bocas de riego de una redondeada
 
@@ -29,10 +31,18 @@ rend=0.9;
 %Grados de libertad bocas
 tGL=[6 12 16];
 GL=24./tGL;
-distGL=[31.6 50.8 17.6;23.8 45.7 30.5;43.3 22.8 33.9;61.7 31.7 6.6;60.2 8.1 31.7;92.5 0.1 7.4;18.1 50.2 31.7;94.7 2.7 2.6]./100;
+distGL=[
+31.6 50.8 17.6;...
+23.8 45.7 30.5;...
+43.3 22.8 33.9;...
+61.7 31.7 6.6;...
+60.2 8.1 31.7;...
+92.5 0.1 7.4;...
+18.1 50.2 31.7;...
+94.7 2.7 2.6]./100;
 
 %Tiempo operación estación bombeo por meses
-tfunc=18;
+tfunc=[18 18 18 18 18 18 18 18 18 18 18 18];
 
 %Caudal ficticio continuo (L/s)
 necRiego=sum(distCult.*Hr,1)./rend;%Necesidades de riego (mm/dia) mediante ponderación según la distribución de cultivos por meses
@@ -58,9 +68,9 @@ triegoGL3=necRiego.*S./qGL3.*1e4./3600.*distGL(:,3);
 
 for k=1:12
   
-  horaComienzoGL1=floor(rand(numel(S),12).*(tfunc-triegoGL1));
-  horaComienzoGL2=floor(rand(numel(S),12).*(tfunc-triegoGL2));
-  horaComienzoGL3=floor(rand(numel(S),12).*(tfunc-triegoGL3));
+  horaComienzoGL1=floor(rand(numel(S),12).*(tfunc(k)-triegoGL1));
+  horaComienzoGL2=floor(rand(numel(S),12).*(tfunc(k)-triegoGL2));
+  horaComienzoGL3=floor(rand(numel(S),12).*(tfunc(k)-triegoGL3));
   
   duracRiegoGL1=ceil(triegoGL1);
   duracRiegoGL2=ceil(triegoGL2);
@@ -73,17 +83,26 @@ for k=1:12
     planillaRiegoGL2=planillaRiego;
     planillaRiegoGL3=planillaRiego;
     
+    horaComienzoGL1=floor(rand(numel(S),12).*(tfunc-triegoGL1));
+    horaComienzoGL2=floor(rand(numel(S),12).*(tfunc-triegoGL2));
+    horaComienzoGL3=floor(rand(numel(S),12).*(tfunc-triegoGL3));
+  
+    duracRiegoGL1=ceil(triegoGL1);
+    duracRiegoGL2=ceil(triegoGL2);
+    duracRiegoGL3=ceil(triegoGL3);  
+    
     for i=1:numel(S)
       
-      planillaRiegoGL1(i,(1+horaComienzoGL1(i,k)):(1+(horaComienzoGL1(i,k)+duracRiegoGL1(i,k))))=1;
-      planillaRiegoGL2(i,(1+horaComienzoGL2(i,k)):(1+(horaComienzoGL2(i,k)+duracRiegoGL2(i,k))))=1;
-      planillaRiegoGL3(i,(1+horaComienzoGL3(i,k)):(1+(horaComienzoGL3(i,k)+duracRiegoGL3(i,k))))=1;
+      if necRiego(k)~=0 
+        planillaRiegoGL1(i,(1+horaComienzoGL1(i,k)):(1+(horaComienzoGL1(i,k)+duracRiegoGL1(i,k))))=1;
+        planillaRiegoGL2(i,(1+horaComienzoGL2(i,k)):(1+(horaComienzoGL2(i,k)+duracRiegoGL2(i,k))))=1;
+        planillaRiegoGL3(i,(1+horaComienzoGL3(i,k)):(1+(horaComienzoGL3(i,k)+duracRiegoGL3(i,k))))=1;
+      endif
       
     endfor
     
     %Matriz de caudal (L/s) demandado (boca,hora,diaAño)
     q(:,:,diaAgno)=planillaRiegoGL1.*qGL1+planillaRiegoGL2.*qGL2+planillaRiegoGL3.*qGL3;
-    
 
   endfor
 
@@ -99,7 +118,7 @@ xlabel('horas de un año')
 ylabel('Q(L/s)')
 hold off
 
-caudales=reshape(q,8,[]);
+caudales=reshape(q,numel(S),[]);
 
 %Se guardan los caudales demandados de las bocas durante las aproximadamente 8640 horas de un año
 save('cauddemandbocas.m','caudales','-append')
